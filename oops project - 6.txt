@@ -1,0 +1,105 @@
+import java.util.*;
+
+// ========== INTERFACE ==========
+interface Vehicle {
+    void rent();
+    String getType();
+}
+
+// ========== VEHICLE CLASSES ==========
+class Car implements Vehicle {
+    public void rent() {
+        System.out.println("Car rented ");
+    }
+    public String getType() {
+        return "Car";
+    }
+}
+
+class Bike implements Vehicle {
+    public void rent() {
+        System.out.println("Bike rented ");
+    }
+    public String getType() {
+        return "Bike";
+    }
+}
+
+class Truck implements Vehicle {
+    public void rent() {
+        System.out.println("Truck rented ");
+    }
+    public String getType() {
+        return "Truck";
+    }
+}
+
+// ========== FACTORY ==========
+class VehicleFactory {
+    public static Vehicle getVehicle(String type) {
+        if (type == null) return null;
+
+        switch (type.toLowerCase()) {
+            case "car": return new Car();
+            case "bike": return new Bike();
+            case "truck": return new Truck();
+            default: return null;
+        }
+    }
+}
+
+// ========== SERVICE (SOLID) ==========
+class RentalService {
+    public void rentVehicle(Vehicle v) {
+        if (v != null) {
+            v.rent();
+        } else {
+            System.out.println("Invalid Vehicle!");
+        }
+    }
+}
+
+// ========== MULTITHREADING ==========
+class BookingTask implements Runnable {
+    private Vehicle vehicle;
+    private RentalService service;
+
+    public BookingTask(Vehicle v, RentalService s) {
+        vehicle = v;
+        service = s;
+    }
+
+    public void run() {
+        System.out.println("Processing booking for " + vehicle.getType());
+        service.rentVehicle(vehicle);
+
+        try {
+            Thread.sleep(2000);
+        } catch (Exception e) {}
+
+        System.out.println(vehicle.getType() + " booking completed" );
+    }
+}
+
+// ========== MAIN CLASS ==========
+public class Main {
+    public static void main(String[] args) {
+
+        Scanner sc = new Scanner(System.in);
+        RentalService service = new RentalService();
+
+        System.out.println("=== Vehicle Rental System ===");
+        System.out.println("Enter vehicle (car/bike/truck): ");
+        String type = sc.nextLine();
+
+        Vehicle v = VehicleFactory.getVehicle(type);
+
+        if (v == null) {
+            System.out.println("Invalid choice!");
+            return;
+        }
+
+        Thread t = new Thread(new BookingTask(v, service));
+        t.start();
+    }
+}
